@@ -1,0 +1,37 @@
+[
+    {
+      "visitor_name": "John Doe",
+      "purpose_of_visit": "Meeting",
+      "location": "Office A",
+      "employee_to_meet": "Jane Smith",
+      "date": "2025-06-06"
+    },
+    {
+      "visitor_name": "Alice Brown",
+      "purpose_of_visit": "Inspection",
+      "location": "Office B",
+      "employee_to_meet": "Bob Johnson",
+      "date": "2025-06-07"
+    },
+    {
+      "visitor_name": "Sarah Wilson",
+      "purpose_of_visit": "Meeting",
+      "location": "Office A",
+      "employee_to_meet": "Jane Smith",
+      "date": "2025-06-06"
+    },
+    {
+      "visitor_name": "Michael Lee",
+      "purpose_of_visit": "Training",
+      "location": "Office C",
+      "employee_to_meet": "Tom Brown",
+      "date": "2025-06-08"
+    },
+    {
+      "visitor_name": "Emily Davis",
+      "purpose_of_visit": "Meeting",
+      "location": "Office A",
+      "employee_to_meet": "Bob Johnson",
+      "date": "2025-06-07"
+    }
+  ]
