@@ -2,12 +2,10 @@ const fs = require('fs').promises;
 const path = require('path');
 
 const users = [
-  { id: 1, username: 'admin', password: '$2b$10$M5ctS.FhNPHS9t.txVQo0.BjZ6vGT.9tCj0xk7GG17wALBzKn5U6q' } // Password: "password123" (replace with your generated hash)
+  { id: 1, username: 'admin', password: '$2b$10$gcl7o/m5fSuaD1zyy0BKher/GQP4CUrTlnzkK77MtKS7CAeD7gCcO' } // Password: "password123"
 ];
 
-// For sample data (used by /api/data)
 const sampleDataPath = path.join(__dirname, '../data/sampleData.json');
-// For e-pass data (used by /api/visitors)
 const epassDataPath = path.join(__dirname, '../data/epass.json');
 
 const readSampleData = async () => {

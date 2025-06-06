@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { users } = require('../config/db');
 
+console.log('Registering route: /login');
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
 

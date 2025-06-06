@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visitor Data Analysis</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h1 { color: #333; }
+    #login { margin-bottom: 20px; }
+    #analysis { display: none; }
+    .section { margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h1>Visitor Data Analysis</h1>
+  
+  <div id="login">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Username" value="admin"><br><br>
+    <input type="password" id="password" placeholder="Password" value="password123"><br><br>
+    <button onclick="login()">Login</button>
+  </div>
+
+  <div id="analysis">
+    <h2>Analysis Results</h2>
+    <div class="section">
+      <h3>Total Visitors</h3>
+      <p id="totalVisitors"></p>
+    </div>
+    <div class="section">
+      <h3>Visits per Employee</h3>
+      <pre id="visitsPerEmployee"></pre>
+    </div>
+    <div class="section">
+      <h3>Purpose Breakdown</h3>
+      <pre id="purposeBreakdown"></pre>
+    </div>
+    <div class="section">
+      <h3>Visits by Date</h3>
+      <pre id="visitsByDate"></pre>
+    </div>
+    <div class="section">
+      <h3>Visits by Location</h3>
+      <pre id="visitsByLocation"></pre>
+    </div>
+  </div>
+
+  <script>
+    let token = '';
+
+    async function login() {
+      try {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        const response = await fetch('http://localhost:3000/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await response.json();
+
+        if (data.token) {
+          token = data.token;
+          document.getElementById('login').style.display = 'none';
+          document.getElementById('analysis').style.display = 'block';
+          loadAnalysis();
+        } else {
+          alert('Login failed: ' + data.message);
+        }
+      } catch (error) {
+        alert('Error during login: ' + error.message);
+      }
+    }
+
+    async function loadAnalysis() {
+      const headers = { 'Authorization': `Bearer ${token}` };
+
+      try {
+        // Total Visitors
+        const total = await fetch('http://localhost:3000/api/visitors/total', { headers });
+        if (!total.ok) throw new Error(`Failed to fetch total visitors: ${total.statusText}`);
+        const totalData = await total.json();
+        document.getElementById('totalVisitors').textContent = totalData.totalVisitors;
+
+        // Visits per Employee
+        const employee = await fetch('http://localhost:3000/api/visitors/visits-per-employee', { headers });
+        if (!employee.ok) throw new Error(`Failed to fetch visits per employee: ${employee.statusText}`);
+        const employeeData = await employee.json();
+        document.getElementById('visitsPerEmployee').textContent = JSON.stringify(employeeData, null, 2);
+
+        // Purpose Breakdown
+        const purpose = await fetch('http://localhost:3000/api/visitors/purpose-breakdown', { headers });
+        if (!purpose.ok) throw new Error(`Failed to fetch purpose breakdown: ${purpose.statusText}`);
+        const purposeData = await purpose.json();
+        document.getElementById('purposeBreakdown').textContent = JSON.stringify(purposeData, null, 2);
+
+        // Visits by Date
+        const date = await fetch('http://localhost:3000/api/visitors/visits-by-date', { headers });
+        if (!date.ok) throw new Error(`Failed to fetch visits by date: ${date.statusText}`);
+        const dateData = await date.json();
+        document.getElementById('visitsByDate').textContent = JSON.stringify(dateData, null, 2);
+
+        // Visits by Location
+        const location = await fetch('http://localhost:3000/api/visitors/visits-by-location', { headers });
+        if (!location.ok) throw new Error(`Failed to fetch visits by location: ${location.statusText}`);
+        const locationData = await location.json();
+        document.getElementById('visitsByLocation').textContent = JSON.stringify(locationData, null, 2);
+      } catch (error) {
+        alert('Error loading analysis: ' + error.message);
+      }
+    }
+  </script>
+</body>
+</html>
