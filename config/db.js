@@ -1,12 +1,23 @@
 const fs = require('fs').promises;
 const path = require('path');
+const bcrypt = require('bcrypt');
+
+// Generate a new hash for the password "password123" each time the module is loaded
+const password = 'password123';
+const saltRounds = 10;
+const newHash = bcrypt.hashSync(password, saltRounds);
+console.log('Generated new hash for "password123":', newHash);
 
 const users = [
-  { id: 1, username: 'admin', password: '$2b$10$gcl7o/m5fSuaD1zyy0BKher/GQP4CUrTlnzkK77MtKS7CAeD7gCcO' } // Password: "password123"
+  { id: 1, username: 'admin', password: newHash } // Password: "password123"
 ];
 
+// For sample data (used by /api/data)
 const sampleDataPath = path.join(__dirname, '../data/sampleData.json');
+// For e-pass data (used by /api/visitors)
 const epassDataPath = path.join(__dirname, '../data/epass.json');
+// For user entries (used by /api/entries)
+const entriesDataPath = path.join(__dirname, '../data/entries.json');
 
 const readSampleData = async () => {
   try {
@@ -42,4 +53,22 @@ const writeEpassData = async (data) => {
   await fs.writeFile(epassDataPath, JSON.stringify(data, null, 2));
 };
 
-module.exports = { users, readSampleData, writeSampleData, readEpassData, writeEpassData };
+// New functions for entries
+const readEntries = async () => {
+  try {
+    const data = await fs.readFile(entriesDataPath, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      await fs.writeFile(entriesDataPath, JSON.stringify([]));
+      return [];
+    }
+    throw error;
+  }
+};
+
+const writeEntries = async (data) => {
+  await fs.writeFile(entriesDataPath, JSON.stringify(data, null, 2));
+};
+
+module.exports = { users, readSampleData, writeSampleData, readEpassData, writeEpassData, readEntries, writeEntries };

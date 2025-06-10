@@ -4,6 +4,7 @@ const path = require('path');
 const authRoutes = require('./routes/auth');
 const dataRoutes = require('./routes/data');
 const visitorRoutes = require('./routes/visitors');
+const entriesRoutes = require('./routes/entries');
 const verifyToken = require('./middleware/auth');
 
 const app = express();
@@ -27,14 +28,15 @@ app.use(express.static(path.join(__dirname, 'public'), {
 }));
 
 app.get('/', (req, res) => {
-  res.send('Welcome to the Authentication API! Use POST /api/auth/login to log in, GET /api/data for sample data, and GET /api/visitors for e-pass data.');
+  res.send('Welcome to the Authentication API! Use POST /api/auth/login to log in, GET /api/data for sample data, GET /api/visitors for e-pass data, and POST /api/entries to record date and time.');
 });
 
 app.use('/api/auth', authRoutes);
 app.use('/api/data', dataRoutes);
 app.use('/api/visitors', verifyToken, visitorRoutes);
+app.use('/api/entries', entriesRoutes);
 
-// Comment out the fallback route to test
+// Comment out the fallback route to avoid path-to-regexp error
 // app.get('*', (req, res) => {
 //   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 // });
