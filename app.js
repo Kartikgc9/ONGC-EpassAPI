@@ -28,7 +28,7 @@ app.use(express.static(path.join(__dirname, 'public'), {
 }));
 
 app.get('/', (req, res) => {
-  res.send('Welcome to the Authentication API! Use POST /api/auth/login to log in, GET /api/data for sample data, GET /api/visitors for e-pass data, and POST /api/entries to record date and time.');
+  res.send('Welcome to the Authentication API! Use POST /api/auth/login to log in, GET /api/data for sample data, GET /api/visitors for e-pass data, POST /api/visitors/by-date-time with a body containing startDate, startTime, endDate, and endTime for visitor details by date and time range, POST /api/visitors/by-id with a body containing id to get visitor details by ID, and POST /api/entries to record date and time.');
 });
 
 app.use('/api/auth', authRoutes);

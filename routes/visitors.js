@@ -116,29 +116,42 @@ router.get('/visits-by-location', async (req, res) => {
   }
 });
 
-// New endpoint: GET /api/visitors/by-date-time
+// Existing endpoint: POST /api/visitors/by-date-time
 console.log('Registering route: /by-date-time');
-router.get('/by-date-time', async (req, res) => {
+router.post('/by-date-time', async (req, res) => {
   try {
-    const { date, time } = req.query;
+    const { startDate, startTime, endDate, endTime } = req.body;
 
-    // Validate query parameters
-    if (!date || !time) {
-      return res.status(400).json({ message: 'Date and time query parameters are required' });
+    // Validate request body
+    if (!startDate || !startTime || !endDate || !endTime) {
+      return res.status(400).json({ message: 'startDate, startTime, endDate, and endTime are required in the request body' });
     }
 
     const epassData = await readEpassData();
 
-    // Filter entries for the given date and time
-    const matchingEntries = epassData.filter(
-      (entry) => entry.date === date && entry.time === time
-    );
+    // Convert date and time to comparable format
+    const startDateTime = new Date(`${startDate}T${startTime}:00`);
+    const endDateTime = new Date(`${endDate}T${endTime}:00`);
 
-    if (matchingEntries.length === 0) {
-      return res.status(404).json({ message: 'No visitors found for the specified date and time' });
+    if (isNaN(startDateTime) || isNaN(endDateTime)) {
+      return res.status(400).json({ message: 'Invalid date or time format. Use YYYY-MM-DD for dates and HH:mm for times.' });
     }
 
-    // Calculate the total number of visits by each visitor to each employee
+    if (startDateTime > endDateTime) {
+      return res.status(400).json({ message: 'startDate and startTime must be before endDate and endTime' });
+    }
+
+    // Filter entries within the date and time range
+    const matchingEntries = epassData.filter((entry) => {
+      const entryDateTime = new Date(`${entry.date}T${entry.time}:00`);
+      return entryDateTime >= startDateTime && entryDateTime <= endDateTime;
+    });
+
+    if (matchingEntries.length === 0) {
+      return res.status(404).json({ message: 'No visitors found within the specified date and time range' });
+    }
+
+    // Calculate the total number of visits by each visitor to each employee (across all data)
     const visitCounts = epassData.reduce((acc, entry) => {
       const key = `${entry.visitor_name}:${entry.employee_to_meet}`;
       acc[key] = (acc[key] || 0) + 1;
@@ -153,7 +166,52 @@ router.get('/by-date-time', async (req, res) => {
 
     res.json(result);
   } catch (error) {
-    console.error('Error fetching visitors by date and time:', error);
+    console.error('Error fetching visitors by date and time range:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Updated endpoint: POST /api/visitors/by-id
+console.log('Registering route: /by-id');
+router.post('/by-id', async (req, res) => {
+  try {
+    const { id } = req.body;
+
+    // Validate the ID in the request body
+    if (!id) {
+      return res.status(400).json({ message: 'ID is required in the request body' });
+    }
+
+    const visitorId = parseInt(id, 10);
+    if (isNaN(visitorId) || visitorId <= 0) {
+      return res.status(400).json({ message: 'Invalid ID. ID must be a positive integer.' });
+    }
+
+    const epassData = await readEpassData();
+
+    // Find the visitor record with the matching ID
+    const visitor = epassData.find((entry) => entry.id === visitorId);
+
+    if (!visitor) {
+      return res.status(404).json({ message: `No visitor found with ID ${visitorId}` });
+    }
+
+    // Calculate the total number of visits by this visitor to this employee (across all data)
+    const visitCounts = epassData.reduce((acc, entry) => {
+      const key = `${entry.visitor_name}:${entry.employee_to_meet}`;
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {});
+
+    // Add visit count to the visitor record
+    const result = {
+      ...visitor,
+      visit_count_to_employee: visitCounts[`${visitor.visitor_name}:${visitor.employee_to_meet}`]
+    };
+
+    res.json(result);
+  } catch (error) {
+    console.error('Error fetching visitor by ID:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
